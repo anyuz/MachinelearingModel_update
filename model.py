@@ -1,7 +1,8 @@
-import numpy as np
+
 import pandas as pd
 import xgboost as xgb
 import gc
+import numpy as np
 
 #get training and testing data from mySQL
 #or get from website
