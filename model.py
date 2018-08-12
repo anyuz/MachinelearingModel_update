@@ -1,15 +1,15 @@
-
 import pandas as pd
 import xgboost as xgb
 import gc
 import numpy as np
+import pickle as pickle
+prop = pd.read_csv('properties_2016.csv')
+train = pd.read_csv('train_2016_v2.csv')
+sample = pd.read_csv('sample_submission.csv')
 
 #get training and testing data from mySQL
 #or get from website
-train = pd.read_csv('../input/train_2016.csv')
-prop = pd.read_csv('../input/properties_2016.csv')
-sample = pd.read_csv('../input/sample_submission.csv')
-
+# pull train and test data from S3 bucket
 
 for c, dtype in zip(prop.columns, prop.dtypes):
 	if dtype == np.float64:
@@ -70,10 +70,20 @@ print('Predicting on test ...')
 p_test = clf.predict(d_test)
 
 del d_test; gc.collect()
-
-sub = pd.read_csv('../input/sample_submission.csv')
+# read sample_submission.csv in S3
+sub = pd.read_csv('sample_submission.csv')
 for c in sub.columns[sub.columns != 'ParcelId']:
     sub[c] = p_test
 
-print('Writing csv ...')
-sub.to_csv('predict.csv', index=False, float_format='%.4f') # Thanks to @inversion
+
+pickle.dump(clf, open("xgboostmodel100.dat", "wb"))
+# save model to S3 
+
+# load model from file
+#loaded_model = pickle.load(open("xgboostmodel.dat", "rb"))
+
+# save predict result and score of model to S3
+#sub.to_csv('predict.csv', index=False, float_format='%.4f') # Thanks to @inversion
+
+
+
